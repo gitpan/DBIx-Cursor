@@ -1,6 +1,6 @@
 ########################################################################
 #
-#    Copyright (c) 2001 by Tommi Mäkitalo
+#    Copyright (c) 2001,2002 by Tommi Mäkitalo
 #
 #    This package is free software; you can redistribute it
 #    and/or modify it under the same terms as Perl itself.
@@ -14,7 +14,7 @@ use strict;
 use warnings;
 use Carp;
 
-our $VERSION = '0.13';
+our $VERSION = '0.14';
 
 my %cache;
 
@@ -120,11 +120,15 @@ sub read
   my $dbh   = $self->{dbh};
   my $table = $self->{table};
 
-  my $sql = "select * from $table where "
-          . join(' and ', map { "$_ = ?" } @pk);
+  my $sth = $self->{sth_select};
+  unless ($sth)
+  {
+    my $sql = "select * from $table where "
+            . join(' and ', map { "$_ = ?" } @pk);
 
-  $self->reset;
-  my $sth = $dbh->prepare($sql);
+    $self->reset;
+    $sth = $self->{sth_select} = $dbh->prepare($sql);
+  }
   $sth->execute(@values);
 
   if ($self->{data} = $sth->fetchrow_hashref)
@@ -311,13 +315,18 @@ sub insert
   my $table = $self->{table};
   my $dbh   = $self->{dbh};
 
-  my $sql = "insert into $table values ("
-          . join(', ', ('?') x @{$self->{NAME}})
-          . ')';
+  my $sth = $self->{sth_insert};
+  unless ($sth)
+  {
+    my $sql = "insert into $table values ("
+            . join(', ', ('?') x @{$self->{NAME}})
+            . ')';
+
+    $sth = $self->{sth_insert} = $dbh->prepare($sql);
+  }
 
   my @values = map { $self->{data}{$_} } @{$self->{NAME}};
 
-  my $sth = $dbh->prepare($sql);
   return $sth->execute(@values);
 }
 
@@ -338,10 +347,16 @@ sub delete
   my $dbh   = $self->{dbh};
   my $pk    = $self->{pk};
 
-  my $sql = "delete from $table where "
-          . join(' and ', map { "$_ = ?" } @$pk);
+  my $sth = $self->{sth_delete};
+  unless ($sth)
+  {
+    my $sql = "delete from $table where "
+            . join(' and ', map { "$_ = ?" } @$pk);
+    $sth = $self->{sth_delete} = $dbh->prepare($sql);
+  }
+
   my @pkvalues = map { $data->{$_} } @$pk;
-  my $sth = $dbh->prepare($sql);
+
   $sth->execute(@pkvalues);
 }
 

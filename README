@@ -1,4 +1,4 @@
-DBIx/Cursor version 0.13
+DBIx/Cursor version 0.14
 ========================
 
 The class DBIx::Cursor represents a cursor for a single Database-table.
@@ -33,5 +33,5 @@ This package is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-Copyright (C) 2001 Tommi Mäkitalo, Dr. Eckhardt + Partner GmbH
+Copyright (C) 2001,2002 Tommi Mäkitalo, Dr. Eckhardt + Partner GmbH
 

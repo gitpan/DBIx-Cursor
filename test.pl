@@ -17,18 +17,15 @@ ok(1); # If we made it this far, we're ok.
 # its man page ( perldoc Test ) for help writing this test script.
 
 my ($dbh, $c);
+my ($ds, $user, $passwd);
 
-print "please give me a dbi-data-source, where I can create a table dbixcursor in: ";
-my $ds = <>;
-ok ($ds);
+$skip = ! defined($ENV{DBI_DS});  # do full testing, when datasource given
+$ds = $ENV{DBI_DS} || 'dbi:ExampleP:dir=.';
+$user = $ENV{DBI_USER};
+$passwd = $ENV{DBI_PASSWD};
 
-print "username:";
-my $user = <>;
-print "password:";
-my $passwd = <>;
-
-ok ($dbh = DBI->connect($ds));
-ok ($dbh->do ('
+skip ($skip, $dbh = DBI->connect($ds));
+skip ($skip, $skip || $dbh->do ('
  create table dbixcursor (
    pk1 int not null,
    pk2 int not null,
@@ -38,9 +35,9 @@ ok ($dbh->do ('
    svalue2 varchar(80),
    primary key (pk1, pk2)
  );'));
-ok ($c = new DBIx::Cursor($dbh, 'dbixcursor', 'pk1', 'pk2'));
-ok ($c->set(pk1 => 1, pk2 => 2, ivalue1 => 10, svalue1 => 'hello'));
-ok ($c->insert);
-ok ($c->reset);
-ok ($dbh->do ('drop table dbixcursor'));
-ok ($dbh->disconnect);
+skip ($skip, $c = $skip || new DBIx::Cursor($dbh, 'dbixcursor', 'pk1', 'pk2'));
+skip ($skip, $skip || $c->set(pk1 => 1, pk2 => 2, ivalue1 => 10, svalue1 => 'hello'));
+skip ($skip, $skip || $c->insert);
+skip ($skip, $skip || $c->reset);
+skip ($skip, $skip || $dbh->do ('drop table dbixcursor'));
+skip ($skip, $skip || $dbh->disconnect);
